@@ -1,7 +1,6 @@
-import {defineStore} from 'pinia';
+import { defineStore } from 'pinia';
 import router from "@/router";
-import ApiService from "@/service/api.service";
-
+import JwtService from "@/service/jwt.service";
 
 export const useAuthStore = defineStore('auth', {
     state: () => ({
@@ -14,19 +13,30 @@ export const useAuthStore = defineStore('auth', {
         getCurrentUser: (state) => state.user,
     },
     actions: {
-        SET_USER(state, user) {
-            return state.user = user;
+        SET_USER(user) {
+            this.user = user;
         },
-        SET_TOKEN(state, token) {
-            state.token = token;
+        SET_TOKEN(token) {
+            this.token = token;
+            JwtService.saveToken(token);
         },
-        SET_AUTHENTICATED(state, isAuthenticated) {
-            state.isAuthenticated = isAuthenticated;
+        SET_AUTHENTICATED(isAuthenticated) {
+            console.log('Authenticated:', isAuthenticated);
+            this.isAuthenticated = isAuthenticated;
         },
-        REDIRECT_AFTER_LOGIN(state, user) {
-            router.push({name: 'dashboard'});
+        REDIRECT_AFTER_LOGIN() {
+            router.push({ name: 'dashboard' });
         }
     },
-
-
+    // Enable persistence for the store state
+    persist: {
+        enabled: true,
+        strategies: [
+            {
+                key: 'auth',
+                storage: localStorage,
+                paths: ['user', 'token', 'isAuthenticated'],
+            },
+        ],
+    },
 });

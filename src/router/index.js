@@ -1,4 +1,6 @@
 import {createRouter, createWebHistory} from 'vue-router'
+import { useAuthStore } from '@/stores/auth';
+
 import FrontEndLayout from '../views/frontend/Layout';
 import FrontEndRoutes from '../views/frontend/routes';
 
@@ -13,7 +15,10 @@ const routes = [
     {
         path: '/',
         component: FrontEndLayout,
-        children: FrontEndRoutes
+        children: FrontEndRoutes,
+        meta: {
+            requiresAuth: false,
+        }
     },
 
     {
@@ -21,7 +26,7 @@ const routes = [
         component: BackendEndLayout,
         children: BackEndRoutes,
         meta: {
-            requireAuth: true,
+            requiresAuth: true,
         }
     },
 
@@ -39,5 +44,20 @@ const router = createRouter({
     history: createWebHistory(process.env.BASE_URL),
     routes
 })
+
+// Route guard for authentication
+router.beforeEach((to, from, next) => {
+    const authStore = useAuthStore();
+    if (to.meta.requiresAuth && !authStore.isAuthenticated) {
+        next({ name: 'login' });
+    }
+    else if (to.name === 'login' && authStore.isAuthenticated) {
+        console.log('User is already authenticated')
+        next({ name: 'dashboard' });
+    }
+    else {
+        next();
+    }
+});
 
 export default router

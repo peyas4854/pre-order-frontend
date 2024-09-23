@@ -2,34 +2,25 @@
   <div>
     <div class="container">
       <div class="row">
-        <div class="col-sm-8 m-auto ">
+        <div class="col-sm-8 m-auto">
           <div class="card mt-5">
             <div class="card-header">
-              <h2 class="text-center"> Login</h2>
+              <h2 class="text-center">Login</h2>
             </div>
             <div class="card-body">
-
-              <form>
+              <form @submit.prevent="login"> <!-- Prevent default form submission -->
                 <div class="mb-3">
                   <label for="email" class="form-label">Email address</label>
-                  <input type="email" class="form-control" id="email" aria-describedby="emailHelp"
-                         v-model="form.email">
+                  <input type="email" class="form-control" id="email" aria-describedby="emailHelp" v-model="form.email"
+                         required/>
                 </div>
                 <div class="mb-3">
                   <label for="password" class="form-label">Password</label>
-                  <input type="password" class="form-control" id="password" v-model="form.password">
+                  <input type="password" class="form-control" id="password" v-model="form.password" required/>
                 </div>
-                <div class="mb-3 form-check">
-                  <div class="d-flex bd-highlight">
-
-
-                  </div>
-                </div>
-
                 <div class="d-grid gap-2">
-                  <button class="btn btn-primary" type="button" @click="login()">Sign In</button>
+                  <button class="btn btn-primary" type="submit">Sign In</button> <!-- Changed to submit button -->
                 </div>
-
               </form>
             </div>
           </div>
@@ -40,40 +31,37 @@
 </template>
 
 <script>
-
-
 import ApiService from "@/service/api.service";
-import JwtService from "@/service/jwt.service";
+import JwtService from "@/service/jwt.service"; // Uncomment if you want to save the token
 import SweetAlert from "@/service/sweetalert";
-import { useAuthStore } from "@/stores/auth";
-
+import {useAuthStore} from "@/stores/auth";
 
 export default {
-  name: "Login.vue",
+  name: "Login",
   data() {
     return {
-      form: {}
-    }
+      form: {
+        email: '',
+        password: ''
+      }
+    };
   },
   methods: {
-    login() {
+    async login() {
       const authStore = useAuthStore();
-      console.log(this.form);
-      ApiService.post('/login', this.form)
-          .then((res) => {
-            console.log('res', res.data.data.token);
-            JwtService.saveToken(res.data.data.token);
-            // localStorage.setItem("expires_at", res.data.expires_at);
-            // ApiService.init();
-            authStore.REDIRECT_AFTER_LOGIN(res.data.data.user);
-
-          }).catch((errors) => {
-        SweetAlert.error(errors.response.data.message);
-        console.log('error', errors.response.data.message);
-      });
-
+      try {
+        const res = await ApiService.post('/login', this.form);
+        console.log('Response:', res.data.data.token);
+        JwtService.saveToken(res.data.data.token);
+        authStore.SET_USER(res.data.data.user);
+        authStore.SET_TOKEN(res.data.data.token);
+        authStore.SET_AUTHENTICATED(true);
+        authStore.REDIRECT_AFTER_LOGIN();
+      } catch (error) {
+        SweetAlert.error(error.response.data.message);
+        console.log('Error:', error.response.data.message);
+      }
     }
   }
 }
 </script>
-
