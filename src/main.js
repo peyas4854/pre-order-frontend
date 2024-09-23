@@ -2,6 +2,8 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import './scss/main.scss'
 import { createApp } from 'vue'
+import { createPinia } from 'pinia';
+
 import App from './App.vue'
 import router from './router'
 import {library}         from "@fortawesome/fontawesome-svg-core";
@@ -17,6 +19,15 @@ library.add(far);
 import {dom}             from "@fortawesome/fontawesome-svg-core";
 
 dom.watch();
+//services
+import ApiService      from "@/service/api.service";
+import * as JwtService from "@/service/jwt.service";
+
+ApiService.init();
 
 
-createApp(App).use(router).mount('#app')
+const app = createApp(App);
+
+app.use(createPinia());
+app.use(router);
+app.mount('#app');
