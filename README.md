@@ -1,8 +1,13 @@
-# pre-order-frontend
+# Pre Order Frontend
 
 ## Project setup
 ```
 npm install
+```
+### create .env File and  set VUE_APP_API_URL Value with your api url
+
+```
+VUE_APP_API_URL : Your_api_url
 ```
 
 ### Compiles and hot-reloads for development
