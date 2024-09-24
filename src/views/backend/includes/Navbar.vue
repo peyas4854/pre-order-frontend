@@ -5,10 +5,9 @@
         <div class="dropdown">
           <button class="btn btn-info  dropdown-toggle" type="button" id="dropdownMenuButton1"
                   data-bs-toggle="dropdown" aria-expanded="false">
-            dfg
+            {{ currentUser.name }}
           </button>
           <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
-            <li><a class="dropdown-item" href="#">Profile</a></li>
             <li><a class="dropdown-item " href="javascript:void(0)" @click="logout()">Logout</a></li>
           </ul>
         </div>
@@ -27,6 +26,13 @@ import jwtService from "@/service/jwt.service";
 
 export default {
   name: "Navbar",
+  computed: {
+    // Computed property to get the user from the auth store
+    currentUser() {
+      const authStore = useAuthStore();
+      return authStore.user; // Assuming 'user' is the state that stores the current user
+    }
+  },
   methods: {
     async logout() {
       const token = JwtService.getToken();
@@ -37,6 +43,7 @@ export default {
           authStore.SET_AUTHENTICATED(false);
           authStore.SET_USER({});
           authStore.SET_TOKEN(null);
+          authStore.SET_PERMISSIONS([]);
           jwtService.destroyToken();
         }
       } catch (error) {

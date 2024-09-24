@@ -53,6 +53,7 @@ export default {
         const res = await ApiService.post('/login', this.form);
         console.log('Response:', res.data.data.token);
         JwtService.saveToken(res.data.data.token);
+        ApiService.init();
         authStore.SET_USER(res.data.data.user);
         authStore.SET_TOKEN(res.data.data.token);
         authStore.SET_AUTHENTICATED(true);

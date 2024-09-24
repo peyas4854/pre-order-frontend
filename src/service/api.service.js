@@ -1,6 +1,5 @@
 import axios from 'axios';
 import JwtService from "@/service/jwt.service";
-import {useAuthStore} from '@/stores/auth';
 
 const ApiService = {
     init() {

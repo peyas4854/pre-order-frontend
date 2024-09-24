@@ -7,6 +7,7 @@ export const useAuthStore = defineStore('auth', {
         user: {},
         token: null,
         isAuthenticated: false,
+        permissions: [],
     }),
     getters: {
         isLoggedIn: (state) => state.isAuthenticated,
@@ -26,7 +27,11 @@ export const useAuthStore = defineStore('auth', {
         },
         REDIRECT_AFTER_LOGIN() {
             router.push({ name: 'dashboard' });
-        }
+
+        },
+        SET_PERMISSIONS(permissions) {
+            this.permissions = permissions;  // Commit permissions
+        },
     },
     // Enable persistence for the store state
     persist: {

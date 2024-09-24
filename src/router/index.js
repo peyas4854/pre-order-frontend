@@ -9,6 +9,7 @@ import BackendEndLayout from '../views/backend/Layout';
 import BackEndRoutes from '../views/backend/routes';
 
 import NotFound from '../components/404';
+import ApiService from "@/service/api.service";
 
 const routes = [
 
@@ -32,7 +33,7 @@ const routes = [
 
     {
         path: '/:catchAll(.*)',
-        name: 'Not Found',
+        name: 'NotFound',
         component: NotFound,
         meta: {
             title: 'Not Found'
@@ -45,18 +46,41 @@ const router = createRouter({
     routes
 })
 
-// Route guard for authentication
-router.beforeEach((to, from, next) => {
+
+// Route guard for authentication and permission checking
+router.beforeEach(async (to, from, next) => {
     const authStore = useAuthStore();
+
+    // Check if the route requires authentication
     if (to.meta.requiresAuth && !authStore.isAuthenticated) {
         next({ name: 'login' });
     }
     else if (to.name === 'login' && authStore.isAuthenticated) {
-        console.log('User is already authenticated')
         next({ name: 'dashboard' });
     }
     else {
-        next();
+        // If user is authenticated and route requires permissions, check them
+        if (to.meta.requiredPermission) {
+            try {
+                // Check if permissions are already loaded, otherwise fetch them
+                if (!authStore.permissions.length) {
+                    const permissions = await ApiService.get('/user');
+                    authStore.SET_PERMISSIONS(permissions.data.data.permissions);
+                }
+
+                // Check if the user has the required permission
+                if (authStore.permissions.includes(to.meta.requiredPermission)) {
+                    next();
+                } else {
+                    next({ name: 'NotFound' }); // Redirect to 404 or any other page if permission denied
+                }
+            } catch (error) {
+                next({ name: 'login' }); // Redirect to login if there's an issue
+            }
+        }
+        else {
+            next(); // No permissions required for the route
+        }
     }
 });
 
