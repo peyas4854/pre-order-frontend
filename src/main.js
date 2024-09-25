@@ -3,6 +3,7 @@ import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import './scss/main.scss'
 import { createApp } from 'vue'
 import pinia from './stores/index';
+import Loader from "@/components/Loader";
 
 import App from './App.vue'
 import router from './router'
@@ -30,4 +31,5 @@ const app = createApp(App);
 
 app.use(pinia);
 app.use(router);
+app.component('loader', Loader);
 app.mount('#app');

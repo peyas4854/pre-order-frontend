@@ -7,20 +7,25 @@
             <div class="card-header">
               <h2 class="text-center"> Pre Order </h2>
             </div>
-            <div class="card-body">
+            <div id="loader" v-if="loader">
+              <loader/>
+            </div>
+            <div class="card-body" v-else>
+
               <form @submit.prevent="submit">
                 <div class="mb-3">
                   <label for="name" class="form-label">Name</label>
-                  <input type="text" class="form-control" id="name" v-model="form.name">
+                  <input type="text" class="form-control" id="name" v-model="form.name" required>
                 </div>
                 <div class="mb-3">
                   <label for="email" class="form-label">Email address</label>
-                  <input type="email" class="form-control" id="email" aria-describedby="emailHelp" v-model="form.email" @input="checkEmail" />
+                  <input type="email" class="form-control" id="email" aria-describedby="emailHelp" v-model="form.email"
+                         @input="checkEmail" required/>
                 </div>
 
                 <div class="mb-3">
                   <label for="product" class="form-label">Product</label>
-                  <select class="form-select" v-model="form.product_id">
+                  <select class="form-select" v-model="form.product_id" required>
                     <option selected disabled>Select a product</option>
                     <option value="1">One</option>
                     <option value="2">Two</option>
@@ -64,24 +69,25 @@ export default {
     return {
       form: {},
       showPhone: false,
-      recaptchaSiteKey: process.env.VUE_APP_RECAPTCHA_SITE_KEY
+      recaptchaSiteKey: process.env.VUE_APP_RECAPTCHA_SITE_KEY,
+      loader: false,
     }
   },
   mounted() {
-    const script = document.createElement('script');
-    script.src = "https://www.google.com/recaptcha/api.js";
-    script.async = true;
-    script.defer = true;
-    document.body.appendChild(script);
+    this.initRecaptcha();
+
   },
   methods: {
     checkEmail() {
       this.showPhone = this.form.email.endsWith("@xyz.com");
     },
     submit() {
+      this.loader = true;
+
       const recaptchaResponse = grecaptcha.getResponse();
       if (recaptchaResponse.length === 0) {
         SweetAlert.error('Please complete the reCAPTCHA.');
+        this.loader = false;
         return;
       }
 
@@ -92,11 +98,21 @@ export default {
             console.log(response);
             SweetAlert.success(response.data.message);
             this.form = {};
+            this.initRecaptcha();
+            this.loader = false;
           })
           .catch(error => {
             console.log(error);
             SweetAlert.error(error.response.data.message || 'An error occurred.');
+            this.loader = false;
           });
+    },
+    initRecaptcha() {
+      const script = document.createElement('script');
+      script.src = "https://www.google.com/recaptcha/api.js";
+      script.async = true;
+      script.defer = true;
+      document.body.appendChild(script);
     }
   }
 }
