@@ -91,6 +91,7 @@ export default {
           .then(response => {
             console.log(response);
             SweetAlert.success(response.data.message);
+            this.form = {};
           })
           .catch(error => {
             console.log(error);

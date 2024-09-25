@@ -12,12 +12,23 @@
             <loader/>
           </div>
           <div class="card-body" v-else>
-            <div class="from-group d-flex flex-row-reverse">
-              <button type="button" class="btn btn-success" @click="getPreOrders()">Search</button>
-              <input type="text" class="search form-control" id="search-box" placeholder="Search"
-                     v-model="form.search">
+            <div class="from-group d-flex">
+              <div class="input-group">
+                <input type="text" class="form-control" id="search-box" placeholder="Search"
+                       v-model="form.search"
+                       @keyup.enter="getPreOrders"
+                       @input="onSearchInputChange">
 
+                <!-- Clear button for clearing the search -->
+                <button class="btn btn-outline-secondary" type="button" v-if="form.search" @click="clearSearch">
+                  <i class="fas fa-times"></i>
+                </button>
+
+                <!-- Search button (optional if you want to allow clicking) -->
+                <button type="button" class="btn btn-success" @click="getPreOrders">Search</button>
+              </div>
             </div>
+
             <table class="table table-striped product-table">
               <thead>
               <tr>
@@ -113,6 +124,10 @@ export default {
   methods: {
     getPreOrders() {
       this.loader = true;
+      // Reset the page to 1 if there's a search query
+      if (this.form.search) {
+        this.pagination.current_page = 1;
+      }
       let params = {
         ...this.form,
         page: this.pagination.current_page
@@ -137,6 +152,17 @@ export default {
     viewPreOrder(id) {
       this.$router.push({name: 'preOrderView', params: {id}});
     },
+    clearSearch() {
+      this.form.search = '';
+      this.getPreOrders();
+    },
+
+    onSearchInputChange() {
+      if (!this.form.search) {
+        this.clearSearch(); // Automatically clear if the input is empty
+      }
+
+    }
   }
 }
 </script>
